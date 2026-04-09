@@ -2,7 +2,7 @@ import random
 from enum import Enum, auto
 
 from intent import analyze_intent, Intent
-from llm import ask_charlie
+from llm import ask_charlie, introduce_word
 
 
 class Stage(Enum):
@@ -24,12 +24,7 @@ class LessonController:
     """
     Owns all lesson state and drives the flow.
 
-    Stages:  GREETING → PRACTICE (one word at a time) → DONE
-
-    On each child turn:
-      1. classify input  →  Intent (CORRECT / PARTIAL / WRONG / OFF_TOPIC / SILENT)
-      2. decide action   →  advance word, repeat, or redirect
-      3. build response  →  hardcoded for word transitions, LLM for everything else
+    Proceeds through the following stages: GREETING, PRACTICE (one word at a time), DONE
     """
 
     def __init__(self, words: list[str]):
@@ -45,12 +40,12 @@ class LessonController:
     async def handle(self, user_input: str) -> dict:
         if self.stage == Stage.GREETING:
             self.stage = Stage.PRACTICE
-            return await ask_charlie(self.current_word, user_input="", intent=None)
+            return await introduce_word(self.current_word)
 
         if self.stage == Stage.PRACTICE:
             return await self._practice(user_input)
 
-        return {"text": "Bye-bye! 🦊", "emotion": "happy"}
+        return {"text": "Bye-bye!", "emotion": "happy"}
 
     async def _practice(self, user_input: str) -> dict:
         intent = analyze_intent(user_input, self.current_word)
@@ -61,12 +56,13 @@ class LessonController:
 
             if self.index >= len(self.words):
                 self.stage = Stage.DONE
-                return {"text": "Amazing! You know all the words! Bye-bye! 🦊", "emotion": "excited"}
+                return {"text": "Amazing! You know all the words! Bye-bye!", "emotion": "excited"}
 
-            # Transition is hardcoded — the LLM was unreliable for
-            # praise + next-word introduction in a single response
+            # Praise is hardcoded (reliable), description comes from the LLM
+            intro = await introduce_word(self.current_word)
+            intro_text = intro.get("text", f"Now the next word is '{self.current_word}'! Can you say it?")
             return {
-                "text": f"{random.choice(_PRAISE)} Now the next word is '{self.current_word}'! Can you say it?",
+                "text": f"{random.choice(_PRAISE)} {intro_text}",
                 "emotion": "excited",
             }
 

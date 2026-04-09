@@ -15,7 +15,7 @@ def analyze_intent(user_input: str, expected_word: str) -> Intent:
 
     text = user_input.lower().strip()
 
-    if expected_word in text:
+    if expected_word == text.strip():
         return Intent.CORRECT
 
     if any(expected_word[i:i + 2] in text for i in range(len(expected_word) - 1)):

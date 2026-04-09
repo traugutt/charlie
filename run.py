@@ -6,9 +6,11 @@ load_dotenv()
 
 
 async def main():
-    controller = LessonController(words=["cat", "dog", "bird"])
+    controller = LessonController(words=["cat", "dog", "bird", "car", "house"])
 
-    print("Charlie (happy): Hi! I'm Charlie! Let's learn some words! 🦊")
+    print("Charlie (happy): Hi! I'm Charlie, your English teacher!")
+    print("Charlie (happy): Today we're going to learn some new words together!")
+    print("Charlie (happy): Type OK when you're ready to start!")
 
     while controller.stage != Stage.DONE:
         user_input = input("Child: ").strip()

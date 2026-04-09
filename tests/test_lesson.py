@@ -7,6 +7,7 @@ from lesson import LessonController, Stage
 
 
 MOCK_RESPONSE = {"text": "Say cat!", "emotion": "happy"}
+MOCK_INTRO = {"text": "A dog is a friendly animal! Can you say dog?", "emotion": "excited"}
 
 
 @pytest.fixture
@@ -16,7 +17,7 @@ def controller():
 
 @pytest.mark.asyncio
 async def test_greeting_transitions_to_practice(controller):
-    with patch("lesson.ask_charlie", new=AsyncMock(return_value=MOCK_RESPONSE)):
+    with patch("lesson.introduce_word", new=AsyncMock(return_value=MOCK_INTRO)):
         await controller.handle("hi")
     assert controller.stage == Stage.PRACTICE
 
@@ -24,7 +25,8 @@ async def test_greeting_transitions_to_practice(controller):
 @pytest.mark.asyncio
 async def test_correct_answer_advances_and_introduces_next(controller):
     controller.stage = Stage.PRACTICE
-    response = await controller.handle("cat")
+    with patch("lesson.introduce_word", new=AsyncMock(return_value=MOCK_INTRO)):
+        response = await controller.handle("cat")
     assert controller.index == 1
     assert "dog" in response["text"]
 

@@ -8,7 +8,7 @@ def test_correct():
     assert analyze_intent("cat", "cat") == Intent.CORRECT
 
 def test_correct_within_sentence():
-    assert analyze_intent("I see a cat!", "cat") == Intent.CORRECT
+    assert analyze_intent(" cat ", "cat") == Intent.CORRECT
 
 def test_silence():
     assert analyze_intent("", "cat") == Intent.SILENT
